@@ -7,6 +7,7 @@ import sys
 import argparse
 import numpy as np
 import time
+import os
 
 def readPedigree(pedfile):
     """ Columns: name,father,mother,family,sex,phenotype """
@@ -96,7 +97,15 @@ def readMarkers(markerfile):
     return mark
 
 def main():
-    parser = argparse.ArgumentParser(description='Processes genotypes.')
+    # Gather a list of available conversion formats
+    pathname = os.path.dirname(sys.argv[0])
+    filelist = os.listdir(pathname+'/convmods')
+    fl = []
+    for fi in filelist:
+        if fi.startswith('io') and fi.endswith('.py'):
+            fl.append(fi[2:-3])
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description='Converts between the following SNP-formats:\n %s' % ' '.join(fl))
     parser.add_argument('-i','--genotypes', dest='genosfile',help='Input file')
     parser.add_argument('-n','--informat',dest='inform',help='Input file format',default='Geno')
     parser.add_argument('-p','--pedigree',dest='pedigreefile',help='Pedigree file')
@@ -107,7 +116,7 @@ def main():
     args = parser.parse_args()
     if args.genosfile == 'None': args.genosfile = None
     if args.pedigreefile == 'None': args.pedigreefile = None
-    if args.markerefile == 'None': args.markerfile = None
+    if args.markerfile == 'None': args.markerfile = None
     # Reads pedigree and marker information
     if args.pedigreefile:
         rped = readPedigree(args.pedigreefile)

@@ -1,2 +1,24 @@
 snptranslate
 A project to translate between SNP formats.
+
+usage: convSNP.py [-h] [-i GENOSFILE] [-n INFORM] [-p PEDIGREEFILE]
+                  [-m MARKERFILE] [-o OUTPUTFILE] [-u OUTFORM] [-v VERBOSE]
+
+Processes genotypes.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i GENOSFILE, --genotypes GENOSFILE
+                        Input file
+  -n INFORM, --informat INFORM
+                        Input file format
+  -p PEDIGREEFILE, --pedigree PEDIGREEFILE
+                        Pedigree file
+  -m MARKERFILE, --markers MARKERFILE
+                        Marker file
+  -o OUTPUTFILE, --output OUTPUTFILE
+                        Output file
+  -u OUTFORM, --outformat OUTFORM
+                        Output file format
+  -v VERBOSE, --verbose VERBOSE
+                        Prints runtime info
