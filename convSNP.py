@@ -97,17 +97,17 @@ def readMarkers(markerfile):
 
 def main():
     parser = argparse.ArgumentParser(description='Processes genotypes.')
-    parser.add_argument('-i','--genotypes', dest='genosfile',help='CIGENE Genotypes file')
+    parser.add_argument('-i','--genotypes', dest='genosfile',help='Input file')
     parser.add_argument('-n','--informat',dest='inform',help='Input file format',default='Geno')
     parser.add_argument('-p','--pedigree',dest='pedigreefile',help='Pedigree file')
     parser.add_argument('-m','--markers',dest='markerfile',help='Marker file')
-    parser.add_argument('-o','--output',dest='outputfile',help='Primary output')
-    parser.add_argument('-u','--outformat',dest='outform',help='Output file format [C/G/M/L/P]',default='C')
+    parser.add_argument('-o','--output',dest='outputfile',help='Output file')
+    parser.add_argument('-u','--outformat',dest='outform',help='Output file format',default='Geno')
     parser.add_argument('-v','--verbose',help='Prints runtime info')
     args = parser.parse_args()
     if args.genosfile == 'None': args.genosfile = None
     if args.pedigreefile == 'None': args.pedigreefile = None
-    if args.pedigreefile == 'None': args.markerfile = None
+    if args.markerefile == 'None': args.markerfile = None
     # Reads pedigree and marker information
     if args.pedigreefile:
         rped = readPedigree(args.pedigreefile)
