@@ -8,7 +8,7 @@ Contact: harald.grove@nmbu.no
 
 **HELP TEXT**
 
-Running the script with the -h option gives the following help text
+Running the script with the `-h` option gives the following help text
 (the list of formats will automatically update when new formats are added):
 
 ```sh
