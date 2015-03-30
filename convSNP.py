@@ -59,13 +59,12 @@ def readMarkers(markerfile):
     """
         Columns options:
           name,position,allele1,allele2,chromosome
-          chromosome,rank,name,position
+          chromosome,name,CM,position (PLINK)
           name
     """
     with open(markerfile,'r') as fin:
         mark = {'marklist':[]}
         count = 0
-        known = True
         for line in fin:
             if line.startswith('#'): continue
             l = line.strip().split()
@@ -74,13 +73,13 @@ def readMarkers(markerfile):
             if name == 'marklist':
                 sys.stderr.write('"marklist" is not a legal markername\n')
                 sys.exit(1)
-            if len(l) == 5 or len(l) == 4 and len(l[2]) == len(l[3]) == 1:
-                name,position,a1,a2 = l[0],int(l[1]),l[2],l[3]
-                if len(l) == 5:
-                    chrom = l[4]
+            if len(l) == 6:
+                chrom,name,cm,position,a1,a2 = l[0],l[1],l[2],l[3],l[4],l[5]
+            elif len(l) == 5:
+                name,position,a1,a2,chrom = l[0],int(l[1]),l[2],l[3],l[4]
                 rank = count
             elif len(l) == 4:
-                chrom,rank,name,position = l[0],count,l[2],l[3]
+                chrom,name,cm,position,rank = l[0],l[1],l[2],l[3],count
             elif len(l) == 1:
                 name = l[0]
             if name not in mark:
@@ -91,7 +90,6 @@ def readMarkers(markerfile):
                                    'a2':a2,
                                    'a2x':0,
                                    'rank':rank}
-                if a1 == '0' or a2 == '0': known = False
                 count += 1
                 mark['marklist'].append(name)
     return mark
