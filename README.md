@@ -1,5 +1,9 @@
 snptranslate
 ==================
+
+### NB!! 
+**See the Wiki at https://github.com/haraldgrove/snptranslate/wiki for new info**
+
 The project `snptranslate` is for converting between the various genotype formats.
 The script will read one and one file from the input file and translate it
 as necessary before writing it to the output file.
