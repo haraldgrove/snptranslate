@@ -21,27 +21,66 @@ class Geno(object):
         pass
 
     def updatemark(self):
-        """ Changes markeralleles from 'ACGT' to '1234' """
-        trans = {'A':'1','1':'1','C':'2','2':'2','G':'3','3':'3','T':'4','4':'4'}
-        lmark = self.mark['marklist']
-        for mark in lmark:
-            self.mark[mark]['a1'] = trans.get(self.mark[mark]['a1'],'0')
-            self.mark[mark]['a2'] = trans.get(self.mark[mark]['a2'],'0')
+        pass
 
     def translate(self,line):
         """ convert a string to a Geno object """
+        def trans(self,a,mark):
+            m1,m2 = self.mark[mark]['a1'],self.mark[mark]['a2']
+            if a == '0': return m1+m1
+            if a == '1': return m1+m2
+            if a == '2': return m2+m2
+            return '00'
         if line.startswith('#'): return None
-        return line.strip().split()
+        l = line.strip().split()
+        return l[0]+[trans(e) for e in l[1:]]
 
-    def write(self,fout,line):
-        """ Converts a line to a genotype-line and writes it """
-        if not self.header:
-            fout.write('#\t%s\n' % '\t'.join([m for m in self.mark['marklist']]))
-            self.header = True
-        try:
-            fout.write('%s\n' % ('\t'.join([l for l in line])))
-        except TypeError:
-            return
+    def writeFile(self,output,results,output2=None):
+        """
+        Writes out DMU format
+        Results contain the genotypes, markerlist and pedigree as were found in the input file
+        Any external markerlist/pedigree are stored in self.mark/self.ped
+        """
+        def trans(a,m1,m2):
+            if a[0] != a[1]: return '1'
+            if a[0] == m1: return '0'
+            if a[0] == m2: return '2'
+            return '-1'
+        gen = results['gen']
+        if self.ped: ped = self.ped
+        else: ped = results['ped']
+        pedlist = ped['pedlist']
+        if self.mark: mark = self.mark
+        else: mark = results['mark']
+        marklist = mark['marklist']
+        with open(output,'w') as fout:
+            fout.write('#\t%s\n' % '\t'.join(marklist))
+            for animal in pedlist:
+                ra = results['ped'][animal]['rank']
+                fout.write('%s' % (animal))
+                for i,m in enumerate(marklist):
+                    try:
+                        rm = results['mark'][m]['rank']
+                        a = gen[ra,rm]
+                        if a == 0:
+                            a = '00'
+                        else:
+                            a = '%.0f' % a
+                    except KeyError:
+                        if output2: continue
+                        a = '00'
+                        # This could be handled with more feedback to user
+                    if len(a) < 2:
+                        raise Exception('Unknwon allele "%s"\n' % a)
+                    fout.write('\t%s' % trans(a,mark[m]['a1'],mark[m]['a2']))
+                fout.write('\n')
+        if not output2: return
+        with open(output2,'w') as fout:
+            for m in marklist:
+                if m not in results['mark']: continue
+                ch = mark[m]['chrom']
+                pos = mark[m]['pos']
+                fout.write('%s\t%s\t%s\t%s\n' % (ch,m,0,pos))
 
 def main():
     print('Not a standalone program, exiting.')
