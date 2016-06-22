@@ -23,26 +23,28 @@ class Geno(object):
         Collects necessary (additional) pedigree information from the input file
         """
         count = 0
+        family = -1
+        pops = False
         ped = {'pedlist':[]}
         with open(input,'r') as fin:
             for line in fin:
                 l = line.strip().split()
-                family,animal,father,mother,sex,ph = l[0],l[1],l[2],l[3],l[4],l[5]
-                ped['pedlist'].append(animal)
-                if animal not in ped:
-                    ped[animal] = {'father':father,
-                                    'mother':mother,
-                                    'family':family,
-                                    'sex':'3',
-                                    'phe':'-9',
-                                    'rank':count,
-                                    'children':[]}
-                    if family not in ped['familylist']: ped['familylist'].append(family)
-                else:
-                    if family not in ped[name]['family']:
-                        ped[name]['family'].append(family)
-                        if family not in ped['familylist']: ped['familylist'].append(family)
-                count += 1
+                if l[0].lower() == "pop":
+                    pops = True
+                    family += 1
+                if pops and not l[0].lower() == "pop":
+                    animal = l[0]
+                    ped['pedlist'].append(animal)
+                    if animal not in ped:
+                        ped[animal] = {'father':'0',
+                                        'mother':'0',
+                                        'family':'F' + str(family),
+                                        'sex':'3',
+                                        'phe':'-9',
+                                        'rank':count,
+                                        'children':[]}
+                    count += 1
+
         for animal in ped['pedlist']:
             father,mother = ped[animal]['father'],ped[animal]['mother']
             if father in ped:
@@ -55,57 +57,60 @@ class Geno(object):
         """
         Gathers information about markers, if missing
         """
-        raise Exception('Missing marker information')
+        count = 0
+        mark = {'marklist':[]}
+        print input
+        with open(input,'r') as fin:
+            for line in fin:
+                if line.startswith('#'):
+                    mnames = line.strip('#').strip().split()
+                    mark['marklist'] = mnames
+                    for name in mnames:
+                        if name not in mark:
+                            mark[name] = {'chrom':'0',
+                                          'pos':count,
+                                          'a1':None,
+                                          'a1x':0,
+                                         'a2':None,
+                                         'a2x':0,
+                                         'rank':count}
+                            count += 1
+                    return mark
+        #raise Exception('Missing marker information in file')
 
     def readFile(self,input,emark=None):
         """
         Reads whole file into memory and returns a dictionary with a numpy array
         """
         if not self.mark: raise Exception('Missing marker file (.MAP)')
-        marklist = self.mark['marklist']
+        mark = self.mark
+        marklist = mark['marklist']
         ped = self.updatePed(input)
         pedlist = ped['pedlist']
         gen = np.zeros((len(pedlist),len(marklist)))
+        pops = False
+        count = -1
         with open(input,'r') as fin:
             for line in fin:
                 if line.strip().startswith('#'): continue
                 l = line.strip().split()
-                if len(l) == len(marklist)+1 or len(l) == len(marklist)*2+1: animal,geno = l[0],l[1:]
-                elif len(l) == len(marklist)+6 or len(l) == len(marklist)*2+6: family,animal,father,mother,sex,ph,geno = l[0],l[1],l[2],l[3],l[4],l[5],l[6:]
-                elif len(l) == 0: pass
-                else:
-                    raise Exception('Found %d genotypes for %s, expected %d markers\n' % (len(l)-3,l[0],len(marklist)) )
-                ra = ped[animal]['rank']
-                if len(geno) == len(marklist):
-                    for i,m in enumerate(marklist):
-                        rm = mark[m]['rank']
-                        a = geno[i]
-                        if len(a) == 2:
-                            gen[ra,rm] = int(self.trans.get(a[0],'0')+self.trans.get(a[1],'0'))
-                        elif len(a) == 1:
-                            gen[ra,rm] = int(self.trans.get(a,'0')+self.trans.get(a,'0'))
-                        elif len(a) == 4: # Includes either 'DEL' or 'INS'
-                            if a[:3] == 'DEL': gen[ra,rm] =  int('5'+self.trans.get(a[3],'0'))
-                            elif a[1:] == 'DEL': gen[ra,rm] = int(self.trans.get(a[0],'0')+'5')
-                            elif a[:3] == 'INS': gen[ra,rm] = int('6'+self.trans.get(a[3],'0'))
-                            elif a[1:] == 'INS': gen[ra,rm] = int(self.trans.get(a[0],'0')+'6')
+                if l[0].lower() == "pop":
+                    pops = True
+                    count = count + 1
+                if pops and not l[0].lower() == "pop":
+                    if len(l) == len(marklist)+2: animal,geno,family = l[0],l[2:],'F'+str(count)
+                    elif len(l) == 0: pass
+                    else:
+                        raise Exception('Found %d genotypes for %s, expected %d markers\n' % (len(l)-3,l[0],len(marklist)) )
+                    ra = ped[animal]['rank']
+                    if len(geno) == len(marklist):
+                        for i,m in enumerate(marklist):
+                            rm = mark[m]['rank']
+                            a = geno[i]
+                            if len(a) == 4:
+                                gen[ra,rm] = int(self.trans.get(a[1],'0')+self.trans.get(a[3],'0'))
                             else:
-                                raise Exception('Error in importing, unknown allele: %s' % a )
-                        elif len(a) == 6:
-                            if a == 'DELDEL': gen[ra,rm] =  int('5'+'5')
-                            elif a == 'DELINS': gen[ra,rm] =  int('5'+'6')
-                            elif a == 'INSDEL': gen[ra,rm] =  int('6'+'5')
-                            elif a == 'INSINS': gen[ra,rm] =  int('6'+'6')
-                            else:
-                                raise Exception('Error in importing, unknown allele: %s' % a )
-                        else:
-                            raise Exception('Unknown combination of alleles: %s' % a )
-                elif len(geno) == 2*len(marklist):
-                    for i,m in enumerate(marklist):
-                        rm = self.mark[m]['rank']
-                        a1 = geno[i*2]
-                        a2 = geno[i*2+1]
-                        gen[ra,rm] = int(self.trans.get(a1,'0')+self.trans.get(a2,'0'))
+                                raise Exception('Unknown combination of alleles: %s' % a )
         results = {'ped':ped,'mark':self.mark,'gen':gen}
         return results
 
