@@ -18,14 +18,14 @@ class Geno(object):
                       'DEL':'5','D':'5','5':'5',
                       'INS':'6','I':'6','6':'6'}
 
-    def isgzip(input=None):
+    def isgzip(inputfile):
         """
         Determines if input file ends in .gz
         """
-        if input.lower().endswith(('.gz')):
+        if inputfile.lower().endswith(('.gz')):
             return True
     
-    def updatePedMark(self,input=None):
+    def updatePedMark(self,isgzip,input):
         """
         Collects necessary (additional) pedigree information from the input file
         """
