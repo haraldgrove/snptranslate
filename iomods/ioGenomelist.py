@@ -25,7 +25,7 @@ class Geno(object):
         if inputfile.lower().endswith(('.gz')):
             return True
     
-    def updatePedMark(self,isgzip,input):
+    def updatePedMark(self,input):
         """
         Collects necessary (additional) pedigree information from the input file
         """
