@@ -29,6 +29,13 @@ class Geno(object):
 
     def translate(self,line):
         """ convert a string to a Geno object """
+
+        def trans(g,m):
+            if g[0] != g[1]: return '1'
+            if g[0] == m[0]: return '0'
+            if g[0] == m[1]: return '2'
+            return 'nan'
+
         if line.strip().startswith('#'):
             return None
         elif len(self.mark['marklist']) > 0:

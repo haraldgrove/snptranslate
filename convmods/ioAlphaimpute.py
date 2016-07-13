@@ -34,10 +34,12 @@ class Geno(object):
 
     def write(self,fout,line):
         """ Converts a line to a genotype-line and writes it """
+        if line is None: return
         try:
-            fout.write('%s\n' % ('\t'.join([l for l in line])))
+            gen = line[0]
+            fout.write('%s\n' % ('\t'.join([l for l in gen])))
         except TypeError:
-            return
+            sys.stderr.write('Error in [%s]\n' % (gen))
 
 def main():
     print('Not a standalone program, exiting.')

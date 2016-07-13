@@ -93,8 +93,11 @@ class Geno(object):
                         raise Exception('Header line found, but columne with "SNP Name" is missing.')
                     continue
                 l = line.strip().split('\t')
-                animal = l[csample]
-                marker = l[cmark]
+                try:
+                    animal = l[csample]
+                    marker = l[cmark]
+                except IndexError:
+                    continue
                 ra = ped[animal]['rank']
                 a1,a2 = l[2],l[3]
                 try: gc = l[4]
