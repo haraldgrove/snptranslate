@@ -18,6 +18,13 @@ class Geno(object):
                       'DEL':'5','D':'5','5':'5',
                       'INS':'6','I':'6','6':'6'}
 
+    def isgzip(input):
+        """
+        Determines if input file ends in .gz
+        """
+        if input.lower().endswith(('.gz')):
+            return True
+    
     def updatePedMark(self,input=None):
         """
         Collects necessary (additional) pedigree information from the input file
@@ -28,7 +35,12 @@ class Geno(object):
         mark = {'marklist':[]}
         csample = 1
         cmark = 0
-        with open(input,'r') as fin:
+        
+        if isgzip(input):
+            op = gzip.open
+        else:
+            op = open
+        with op(input,'r') as fin:
             for line in fin:
                 if line.startswith('[Header]'):
                     for i in xrange(0,8): fin.next()
@@ -79,7 +91,11 @@ class Geno(object):
         gcscore = np.zeros((len(pedlist),len(marklist)))
         csample = 1
         cmark = 0
-        with open(input,'r') as fin:
+        if isgzip(input):
+            op = gzip.open
+        else:
+            op = open
+        with op(input,'r') as fin:
             for line in fin:
                 if line.strip().startswith('#'): continue
                 if line.startswith('[Header]'):
