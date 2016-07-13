@@ -18,7 +18,7 @@ class Geno(object):
                       'DEL':'5','D':'5','5':'5',
                       'INS':'6','I':'6','6':'6'}
 
-    def isgzip(input):
+    def isgzip(input=None):
         """
         Determines if input file ends in .gz
         """
