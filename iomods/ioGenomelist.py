@@ -18,11 +18,11 @@ class Geno(object):
                       'DEL':'5','D':'5','5':'5',
                       'INS':'6','I':'6','6':'6'}
 
-    def isgzip(inputfile):
+    def isgzip(self,input):
         """
         Determines if input file ends in .gz
         """
-        if inputfile.lower().endswith(('.gz')):
+        if input.lower().endswith(('.gz')):
             return True
     
     def updatePedMark(self,input):
@@ -36,7 +36,7 @@ class Geno(object):
         csample = 1
         cmark = 0
         
-        if isgzip(input):
+        if self.isgzip(input):
             op = gzip.open
         else:
             op = open
@@ -91,7 +91,7 @@ class Geno(object):
         gcscore = np.zeros((len(pedlist),len(marklist)))
         csample = 1
         cmark = 0
-        if isgzip(input):
+        if self.isgzip(input):
             op = gzip.open
         else:
             op = open
