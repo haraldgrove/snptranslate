@@ -75,7 +75,7 @@ class Geno(object):
                 ra = ped[animal]['rank']
                 if len(geno) == len(marklist):
                     for i,m in enumerate(marklist):
-                        rm = mark[m]['rank']
+                        rm = self.mark[m]['rank']
                         a = geno[i]
                         if len(a) == 2:
                             gen[ra,rm] = int(self.trans.get(a[0],'0')+self.trans.get(a[1],'0'))

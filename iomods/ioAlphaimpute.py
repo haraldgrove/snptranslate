@@ -7,6 +7,7 @@
 # A library with some genotype functions
 
 import sys
+import numpy as np
 
 class Geno(object):
     def __init__(self, ped=None, mark=None):
@@ -47,7 +48,7 @@ class Geno(object):
         count = 0
         mark = {'marklist':[]}
         with open(input,'r') as fin:
-            line = fin.next()
+            line = next(fin)
             if not line.startswith('#'): raise Exception('Missing marker information')
             mark['marklist'] = line.strip('#').strip().split()
         for name in mark['marklist']:
@@ -62,7 +63,7 @@ class Geno(object):
                 count += 1
         return mark
 
-    def readFile(self,input):
+    def readFile(self,input, emark=None):
         """
         Reads whole file into memory and returns a dictionary with a numpy array
         """
@@ -71,8 +72,7 @@ class Geno(object):
             if a == '1': return m1+m2
             if a == '2': return m2+m2
             return '00'
-        mark = self.updateMark(input)
-        marklist = mark['marklist']
+        marklist = self.mark['marklist']
         ped = self.updatePed(input)
         pedlist = ped['pedlist']
         gen = np.zeros((len(pedlist),len(marklist)))
@@ -85,10 +85,10 @@ class Geno(object):
                     raise Exception('Found %d genotypes for %s, expected %d markers\n' % (len(l)-1,l[0],len(marklist)) )
                 ra = ped[animal]['rank']
                 for i,m in enumerate(marklist):
-                    rm = mark[m]['rank']
+                    rm = self.mark[m]['rank']
                     a = geno[i]
                     gen[ra,rm] = int(trans(a,self.mark[m]['a1'],self.mark[m]['a2']))
-        results = {'ped':ped,'mark':mark,'gen':gen}
+        results = {'ped':ped,'mark':self.mark,'gen':gen}
         return results
 
     def writeFile(self,output,results,output2=None):
